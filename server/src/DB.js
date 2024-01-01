@@ -1,56 +1,30 @@
-class DataBase {
-  static _instance = {
-    chats: {},
-  };
+let instance;
 
-  constructor(initValue = {
-    chats: {},
-  }) {
-    console.log('constructor ', this._instance);
+function DataBase(initialValues = {}) {
+  if (instance) return instance;
 
-    if (this._instance) return;
+  instance = {
+    chats: initialValues,
+    getInstance() { return this.chats; },
+    connectToRoom({ roomName, userName }) {
+      if (this.chats[roomName]) {
+        this._instance.chats[roomName] = {
+          messages: [...this._instance.chats[roomName].messages],
+          users: [...this._instance.chats[roomName].users, userName],
+        };
 
-    this._instance = initValue;
-  }
+        return;
+      }
 
-  static connectToRoom = ({ userName, roomName }) => {
-    if (this._instance.chats[roomName]) {
-      this._instance.chats[roomName] = {
-        messages: [...this._instance.chats[roomName].messages],
-        users: [...this._instance.chats[roomName].users, userName],
+      this.chats[roomName] = {
+        messages: [],
+        users: [userName],
       };
-
-      return;
-    }
-
-    this._instance.chats[roomName] = {
-      messages: [],
-      users: [userName],
-    };
+    },
+    arrowThis: () => this,
   };
 
-  static getMessages = ({ roomName }) => {
-    if (!this._instance.chats[roomName]) return [];
-
-    return this._instance.chats[roomName].messages;
-  };
-
-  static sendMessage = ({ roomName, message, userName }) => {
-    if (!this._instance.chats[roomName]) return;
-
-    const messageInstance = {
-      user: userName,
-      content: message,
-    };
-    this._instance.chats[roomName].messages = [
-      ...this._instance.chats[roomName].messages,
-      messageInstance,
-    ];
-  };
-
-  static getInstance() {
-    return this._instance;
-  }
+  return instance;
 }
 
 module.exports = DataBase;
